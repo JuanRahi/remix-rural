@@ -10,20 +10,14 @@ import {
 } from "remix";
 import type { LinksFunction } from "remix";
 
-import globalStylesUrl from "~/styles/global.css";
-import darkStylesUrl from "~/styles/dark.css";
+import styles from "./tailwind.css";
 
 // https://remix.run/api/app#links
 export let links: LinksFunction = () => {
   return [
-    { rel: "stylesheet", href: globalStylesUrl },
-    {
-      rel: "stylesheet",
-      href: darkStylesUrl,
-      media: "(prefers-color-scheme: dark)"
-    }
+    { rel: "stylesheet", href: styles }
   ];
-};
+}
 
 // https://remix.run/api/conventions#default-export
 // https://remix.run/api/conventions#route-filenames
@@ -121,34 +115,37 @@ function Document({
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="remix-app">
-      <header className="remix-app__header">
-        <div className="container remix-app__header-content">
-          <Link to="/" title="Remix" className="remix-app__header-home-link">
-            <RemixLogo />
-          </Link>
-          <nav aria-label="Main navigation" className="remix-app__header-nav">
-            <ul>
-              <li>
-                <Link to="/">Home</Link>
-              </li>
-              <li>
-                <a href="https://remix.run/docs">Remix Docs</a>
-              </li>
-              <li>
-                <a href="https://github.com/remix-run/remix">GitHub</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
+    <div className="flex flex-col h-screen">
+      <header className="p-4">
+        <RemixLogo />          
       </header>
-      <div className="remix-app__main">
-        <div className="container remix-app__main-content">{children}</div>
+      <div className="flex flex-1">
+        <nav className="flex w-60 p-4">
+          <ul className="space-y-2">
+            <li>
+              <Link to="/vacunos">Vacunos</Link>
+            </li>
+            <li>
+              <Link to="/controles">Controles</Link>
+            </li>
+            <li>
+              <Link to="/compras">Compras</Link>
+            </li>
+            <li>
+              <Link to="/ventas">Ventas</Link>
+            </li>
+            <li>
+              <Link to="/gastos">Gastos</Link>
+            </li>
+            <li>
+              <Link to="/impuestos">Potreros</Link>
+            </li>
+          </ul>
+        </nav>
+        <div className="flex-1 p-4">{children}</div>
       </div>
-      <footer className="remix-app__footer">
-        <div className="container remix-app__footer-content">
-          <p>&copy; You!</p>
-        </div>
+      <footer className="flex justify-center items-center">
+        <p>&copy; You!</p>
       </footer>
     </div>
   );
