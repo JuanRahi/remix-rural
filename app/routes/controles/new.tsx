@@ -1,6 +1,7 @@
 import { Form, redirect, useLoaderData } from 'remix'
 import type { ActionFunction, LoaderFunction } from 'remix'
 import { supabase } from '~/utils/supabaseClient'
+import { parseCsv } from '~/utils/csvHelper'
 
 export let loader: LoaderFunction = async () => {
     const { data, status, error } = await supabase
@@ -17,15 +18,44 @@ export let action: ActionFunction = async ({ request }) => {
     const form = await request.formData()
     const fecha = form.get("fecha")
     const url = form.get("url")
-    const potrero = form.get("potrero")
-    const { data, error } = await supabase
-        .from('controles')
-        .insert([
-            { fecha, url, tipo: 'control', potrero }
-        ])
+    let potrero = form.get("potrero")
+    potrero = potrero != "0" ? potrero : null
 
-    if(!error)
-        return redirect('/controles')
+    const { data: control, error } = await supabase
+        .from('controles')
+        .insert(
+            { fecha, url, tipo: 'control', potrero }
+        )
+        
+    if(!error){
+        let lecturas: number[] = await parseCsv(url?.toString() || '')    
+    
+        let { data: propios, error: propios_error } = await supabase
+            .from('vacunos')
+            .select('caravana, potrero:vacunos_potrero (id)')
+
+        if(propios_error)
+            throw new Response(propios_error.message)
+
+        // insert lecturas ==> control
+        let control_lecturas = lecturas.map(caravana => ({ caravana, control: control[0].id, propio: propios?.some(x => x.caravana === caravana) }))                
+        const { data, error: procesar_error } = await supabase
+            .from('control_lecturas')
+            .insert(control_lecturas)
+
+        // insert faltan ==> control
+        let control_faltan = propios.filter(x => x.potrero?.id == potrero && !lecturas.includes(x.caravana))
+            .map(x => ({ caravana: x.caravana, control: control[0].id}))
+            
+        const { data: faltan, error: faltan_error } = await supabase
+            .from('control_faltan')
+            .insert(control_faltan)
+            
+        if(procesar_error)
+            throw new Response(procesar_error.message)   
+    }
+
+    return redirect('/controles')
 }
 
 export default function NewControl() {
@@ -54,7 +84,7 @@ export default function NewControl() {
                     </select>
                 </div>
                 <div className="mt-2">
-                    <button type="submit" className="bg-blue-900 text-white rounded w-12 h-8" >Subir</button>
+                    <button type="submit" className="bg-blue-900 text-white rounded w-16 h-8" >Guardar</button>
                 </div>
             </Form>
         </div>

@@ -2,6 +2,17 @@ import { Link, Form, useLoaderData, useSearchParams } from "remix"
 import type { LoaderFunction } from "remix"
 import { supabase } from "../../utils/supabaseClient"
 
+interface Vacuno {
+    caravana: number,
+    raza: string,
+    cruza: string,
+    sexo: string,
+    status: string,
+    nacimiento: Date,
+    propietario: string,
+    fecha_ingreso: Date
+}
+
 export let loader: LoaderFunction = async ({ request }) => {
     let url = new URL(request.url)
     let page = url.searchParams.get('page') || 1
@@ -33,7 +44,7 @@ export let loader: LoaderFunction = async ({ request }) => {
 }
 
 export default function Vacunos(){
-    let data = useLoaderData()
+    let data = useLoaderData<Vacuno[]>()
     let [searchParams] = useSearchParams()
     let page = searchParams.get('page') || 1    
     return (

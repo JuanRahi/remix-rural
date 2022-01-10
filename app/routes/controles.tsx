@@ -35,7 +35,7 @@ export default function Controles(){
                                     <tr key={control.id}>
                                         <td>{new Date(control.fecha).toLocaleDateString()}</td>
                                         <td>{control.tipo}</td>
-                                        <td>{control.potreros?.nombre}</td>
+                                        <td>{control.potreros?.nombre || 'Campo'}</td>
                                         <td>
                                             <Link to={`/controles/${control.id}`}>Ver</Link>
                                         </td>
