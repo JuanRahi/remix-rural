@@ -1,10 +1,39 @@
-import { Form, ActionFunction } from "remix";
+import { Form, ActionFunction, unstable_parseMultipartFormData } from "remix";
+import { parseCsvFromRequest } from "~/utils/csvHelper";
 import { getCategorias } from "~/utils/enumHelper";
 import { supabase } from "~/utils/supabaseClient";
 import { procesarVenta } from "../../services/ventas.service";
 
+
 export let action: ActionFunction = async ({ request }) => {
-    let form = await request.formData()
+    let lecturas: number[] = []
+    let uploadHandler = async ({
+        name,
+        stream,
+        filename
+    }) => {
+        // read caravanas --> lecturas 
+        lecturas = await parseCsvFromRequest(stream)  
+
+        // save file
+        const { data, error } = await supabase
+            .storage
+            .from('ventas')
+            .upload(filename, stream, {
+                cacheControl: '3600',
+                upsert: false
+            })
+
+        // return fileUrl    
+        const { publicURL } = await supabase
+            .storage
+            .from('ventas')
+            .getPublicUrl(filename)
+
+        return publicURL
+    }
+
+    let form = await unstable_parseMultipartFormData(request, uploadHandler)
     let venta = Object.fromEntries(form.entries())
     let { data, error } = await supabase
         .from('ventas')
@@ -13,7 +42,7 @@ export let action: ActionFunction = async ({ request }) => {
     if(error)
         throw new Response(error.message)
     
-    await procesarVenta(venta.lecturas, data?.id, venta.comprador)
+    await procesarVenta(lecturas, data[0].id, venta.comprador)
 
     return data
 }
@@ -23,7 +52,7 @@ export default function NewVenta(){
     return (
         <div className="flex-auto">
             <h2 className="text-xl uppercase">Nueva Venta</h2>
-            <Form method="post">
+            <Form method="post"  encType="multipart/form-data">
                 <div className="space-x-2 mt-2">
                     <label>Fecha</label>
                     <input type="date" name="fecha"/>
@@ -60,7 +89,7 @@ export default function NewVenta(){
                 </div>
                 <div className="space-x-2 mt-2">
                     <label>Lecturas</label>
-                    <input type="tex" name="lecturas"/>
+                    <input type="file" name="lecturas"/>
                 </div>
                 <div className="space-x-2 mt-2">
                     <label>Comprador</label>

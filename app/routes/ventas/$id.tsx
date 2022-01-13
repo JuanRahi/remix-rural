@@ -1,7 +1,7 @@
 import { useLoaderData, Form } from "remix"
 import type { LoaderFunction, ActionFunction } from 'remix'
 import { supabase } from "~/utils/supabaseClient"
-import { procesarVenta } from "../../services/ventas.service"
+import { reProcesarVenta } from "../../services/ventas.service"
 
 export let loader: LoaderFunction = async ({ params }) => {
     const { id } = params
@@ -26,7 +26,7 @@ export let action: ActionFunction = async ({ request, params }) => {
     .maybeSingle()
 
     const { lecturas: url, comprador} = venta
-    await procesarVenta(url, id, comprador)
+    await reProcesarVenta(url, id, comprador)
 
 }
 

@@ -1,7 +1,7 @@
 import { LoaderFunction, ActionFunction, NavLink, Outlet, useActionData } from "remix";
 import { useLoaderData, Form, redirect } from "remix";
 import { supabase } from "~/utils/supabaseClient";
-import { parseCsv } from '~/utils/csvHelper'
+import { parseCsvFromUrl } from '~/utils/csvHelper'
 
 type LoaderData = {
     id: number,
@@ -74,7 +74,7 @@ export let action: ActionFunction = async ({ request, params }) => {
     const form = await request.formData()
     const action = form.get("_action")
 
-    let lecturas: number[] = await parseCsv(control.url?.toString() || '')    
+    let lecturas: number[] = await parseCsvFromUrl(control.url?.toString() || '')    
     
     switch(action){
         case "mover": {

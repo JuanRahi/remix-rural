@@ -1,9 +1,12 @@
-import { parseCsv } from "~/utils/csvHelper"
+import { parseCsvFromUrl } from "~/utils/csvHelper"
 import { supabase } from "~/utils/supabaseClient"
 
-export const procesarVenta = async(url: string, venta: number, comprador: number) => {
-    let lecturas: number[] = await parseCsv(url?.toString() || '')  
-    
+export const reProcesarVenta = async(url: string, venta: number, comprador: number) => {    
+    let lecturas: number[] = await parseCsvFromUrl(url?.toString() || '')      
+    await procesarVenta(lecturas, venta, comprador)
+}
+
+export const procesarVenta = async(lecturas: number[], venta: number, comprador: number) => {    
     // insertar venta_lecturas
     const venta_lecturas = lecturas.map(x => ({ caravana: x, venta}))
     const { data: venta_lecturas_insert, error: error_venta_lecturas} = await supabase

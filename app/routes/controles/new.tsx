@@ -1,7 +1,7 @@
-import { Form, redirect, useLoaderData } from 'remix'
+import { Form, redirect, useLoaderData, unstable_parseMultipartFormData } from 'remix'
 import type { ActionFunction, LoaderFunction } from 'remix'
 import { supabase } from '~/utils/supabaseClient'
-import { parseCsv } from '~/utils/csvHelper'
+import { parseCsvFromRequest } from '~/utils/csvHelper'
 
 export let loader: LoaderFunction = async () => {
     const { data, status, error } = await supabase
@@ -15,11 +15,43 @@ export let loader: LoaderFunction = async () => {
 }
 
 export let action: ActionFunction = async ({ request }) => {
-    const form = await request.formData()
+
+    let lecturas: number[] = []
+    let uploadHandler = async ({
+        name,
+        stream,
+        filename
+    }) => {
+        // read caravanas --> lecturas 
+        lecturas = await parseCsvFromRequest(stream)  
+
+        // save file
+        const { data, error } = await supabase
+            .storage
+            .from('controles')
+            .upload(filename, stream, {
+                cacheControl: '3600',
+                upsert: false
+            })
+
+        // return fileUrl    
+        const { publicURL } = await supabase
+            .storage
+            .from('controles')
+            .getPublicUrl(filename)
+
+        return publicURL
+    }
+    
+    let form = await unstable_parseMultipartFormData(
+        request,
+        uploadHandler
+    )
+            
     const fecha = form.get("fecha")
-    const url = form.get("url")
     let potrero = form.get("potrero")
     potrero = potrero != "0" ? potrero : null
+    let url = form.get("lecturas")
 
     const { data: control, error } = await supabase
         .from('controles')
@@ -28,8 +60,6 @@ export let action: ActionFunction = async ({ request }) => {
         )
         
     if(!error){
-        let lecturas: number[] = await parseCsv(url?.toString() || '')    
-    
         let { data: propios, error: propios_error } = await supabase
             .from('vacunos')
             .select('caravana, potrero:vacunos_potrero (id)')
@@ -63,14 +93,10 @@ export default function NewControl() {
     return (
         <div>
             <h2 className="text-xl uppercase">Nuevo Control</h2>
-            <Form method="post">
+            <Form method="post" encType="multipart/form-data">
                 <div className="space-x-2 mt-2"> 
                     <label>Fecha</label>
                     <input type="date" name="fecha" className=""/>
-                </div>
-                <div className="space-x-2 mt-2"> 
-                    <label>Lecturas</label>
-                    <input type="text" name="url" className=""/>
                 </div>
                 <div className="space-x-2 mt-2">
                     <label>Potrero</label>
@@ -82,6 +108,9 @@ export default function NewControl() {
                             ))
                         }
                     </select>
+                </div>
+                <div className="space-x-2 mt-2">
+                    <input type="file" name="lecturas"/>
                 </div>
                 <div className="mt-2">
                     <button type="submit" className="bg-blue-900 text-white rounded w-16 h-8" >Guardar</button>

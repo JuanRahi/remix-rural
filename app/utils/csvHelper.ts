@@ -1,7 +1,7 @@
 import { parse } from 'csv-parse'
 import https from 'https'
 
-export function parseCsv(url: string): Promise<number[]>{
+export function parseCsvFromUrl(url: string): Promise<number[]>{
     let records: number[] = []
     return new Promise((resolve, reject) => {
         const parser = parse({ columns: true, delimiter: ','})        
@@ -12,5 +12,17 @@ export function parseCsv(url: string): Promise<number[]>{
         https.get(url, (response) => {
             response.pipe(parser)
         })
+    })
+}
+
+export function parseCsvFromRequest(stream): Promise<number[]>{
+    let records: number[] = []
+    return new Promise((resolve, reject) => {
+        const parser = parse({ columns: true, delimiter: ','})        
+        parser.on('data', (data) => records.push(+data.EIC.slice(-8)))
+        parser.on('end', () => resolve(records))
+        parser.on('error', (error) => reject(error))
+
+        stream.pipe(parser)
     })
 }
