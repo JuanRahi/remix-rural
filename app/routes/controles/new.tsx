@@ -1,6 +1,6 @@
 import { Form, redirect, useLoaderData, unstable_parseMultipartFormData } from 'remix'
 import type { ActionFunction, LoaderFunction } from 'remix'
-import { supabase } from '~/utils/supabaseClient'
+import { supabase } from '~/utils/supabaseClient.server'
 import { parseCsvFromRequest } from '~/utils/csvHelper'
 
 export let loader: LoaderFunction = async () => {

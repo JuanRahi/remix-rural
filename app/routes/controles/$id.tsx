@@ -1,6 +1,6 @@
 import { LoaderFunction, ActionFunction, NavLink, Outlet, useActionData } from "remix";
 import { useLoaderData, Form, redirect } from "remix";
-import { supabase } from "~/utils/supabaseClient";
+import { supabase } from "~/utils/supabaseClient.server";
 import { parseCsvFromUrl } from '~/utils/csvHelper'
 
 type LoaderData = {

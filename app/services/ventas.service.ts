@@ -1,5 +1,5 @@
 import { parseCsvFromUrl } from "~/utils/csvHelper"
-import { supabase } from "~/utils/supabaseClient"
+import { supabase } from "~/utils/supabaseClient.server"
 
 export const reProcesarVenta = async(url: string, venta: number, comprador: number) => {    
     let lecturas: number[] = await parseCsvFromUrl(url?.toString() || '')      

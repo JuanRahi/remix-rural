@@ -1,6 +1,6 @@
 import { Link, Form, useLoaderData, useSearchParams } from "remix"
 import type { LoaderFunction } from "remix"
-import { supabase } from "../../utils/supabaseClient"
+import { supabase } from "../../utils/supabaseClient.server"
 
 interface Vacuno {
     caravana: number,

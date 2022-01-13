@@ -1,6 +1,6 @@
 import { useLoaderData, Link, Outlet } from "remix";
 import type { LoaderFunction } from "remix";
-import { supabase } from "~/utils/supabaseClient";
+import { supabase } from "~/utils/supabaseClient.server";
 
 
 export let loader: LoaderFunction = async () => {

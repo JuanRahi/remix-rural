@@ -1,6 +1,6 @@
 import { useLoaderData, Form } from "remix"
 import type { LoaderFunction, ActionFunction } from 'remix'
-import { supabase } from "~/utils/supabaseClient"
+import { supabase } from "~/utils/supabaseClient.server"
 import { reProcesarVenta } from "../../services/ventas.service"
 
 export let loader: LoaderFunction = async ({ params }) => {

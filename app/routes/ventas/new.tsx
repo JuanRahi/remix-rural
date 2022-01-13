@@ -1,7 +1,7 @@
 import { Form, ActionFunction, unstable_parseMultipartFormData } from "remix";
 import { parseCsvFromRequest } from "~/utils/csvHelper";
 import { getCategorias } from "~/utils/enumHelper";
-import { supabase } from "~/utils/supabaseClient";
+import { supabase } from "~/utils/supabaseClient.server";
 import { procesarVenta } from "../../services/ventas.service";
 
 
