@@ -6,17 +6,25 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useCatch
+  useCatch,
+  useLoaderData,
+  redirect
 } from "remix";
-import type { LinksFunction } from "remix";
+import type { LinksFunction, LoaderFunction } from "remix";
 
 import styles from "./tailwind.css";
+import { authenticator } from "./services/auth.server";
 
 // https://remix.run/api/app#links
 export let links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: styles }
   ];
+}
+
+export let loader: LoaderFunction = async ({ request }) => {
+  const user = await authenticator.isAuthenticated(request)
+  return user
 }
 
 // https://remix.run/api/conventions#default-export
@@ -114,10 +122,15 @@ function Document({
 }
 
 function Layout({ children }: { children: React.ReactNode }) {
+  let user = useLoaderData()
   return (
     <div className="flex flex-col h-screen">
       <header className="p-4">
-        <RemixLogo />          
+        { user && 
+          <div className="justify-center items-center flex bg-gray-700 rounded-3xl text-gray-100 w-12 h-12" alt>
+            JR
+          </div>
+        }
       </header>
       <div className="flex flex-1">
         <nav className="flex w-60 p-4">
@@ -139,6 +152,9 @@ function Layout({ children }: { children: React.ReactNode }) {
             </li>
             <li>
               <Link to="/impuestos">Potreros</Link>
+            </li>
+            <li>
+              <Link to="/dicoses">Dicoses</Link>
             </li>
           </ul>
         </nav>
